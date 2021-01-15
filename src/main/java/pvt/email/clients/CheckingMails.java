@@ -161,6 +161,12 @@ public class CheckingMails {
 	}
 
 	/**
+	 * <p>
+	 * Create a Store Object for Mail Recieve. Following steps are followed <br>
+	 * 1. Fetch all Receive protocol details and construct a properties object <br>
+	 * 2. Create a new Session with the properties <br>
+	 * 3. Return the created Store object from Session <br>
+	 * </p>
 	 * @param protocol
 	 * @return Mail Store Object
 	 * @throws MessagingException
@@ -173,9 +179,14 @@ public class CheckingMails {
 	}
 
 	/**
-	 * @param emailSession
-	 * @return Mail Store Object
-	 * @throws MessagingException
+	 * <p>
+	 * Create store object from the Session object and connect with user credentials. 
+	 * Only POP3 and IMAP can be provided as Receive protocol in proporties file, otherwise it would return null.
+	 * 
+	 * </p>
+	 * @param emailSession - Using this session object to create store object
+	 * @return Store - Created Mail Store Object
+	 * @throws MessagingException - Might happen if credentials don't work or server details are incorrect
 	 */
 	private Store connectSessionStore(Session emailSession) throws MessagingException {
 		Store store = null;
@@ -192,12 +203,19 @@ public class CheckingMails {
 			// Connect to the store
 			store.connect(getProperty("IMAP4_HOST"), getProperty("username"), getPassword());
 			break;
+		default:
+			return null;	
 		}
 		return store;
 	}
 
 	/**
-	 * @return Mail Server and User Properties 
+	 * <p>
+	 * Create Properties object for the requested protocol from initialized properties files. 
+	 * Only POP3, IMAP and SMTP can be provided as protocol, otherwise it would return null.
+	 * </p>
+	 * @param protocol - protocol for which properties to be fetched
+	 * @return Properties - Mail Server and User Properties 
 	 */
 	private Properties getProtocolProporties(String protocol) {
 		Properties properties = new Properties();
@@ -226,6 +244,13 @@ public class CheckingMails {
 		return properties;
 	}
 
+	/**
+	 * <p>
+	 * Populate properties object by loading properties from the given property file.
+	 * </p>
+	 * @param propertyFile - property file to be used
+	 * @return Properties - Properties object, NULL is returned if file is not found and error message is printed
+	 */
 	private Properties loadProperties(String propertyFile) {
 		oAuthProperties = new Properties();
 		try {
@@ -238,14 +263,19 @@ public class CheckingMails {
 		return oAuthProperties;
 	}
 
+	/**
+	 * <p> Get a specific property from the properties object. </p>
+	 * @return String - Value of the requested property 
+	 */
 	public String getProperty(String propertyName) {
 		System.out.println(propertyName + " - " + oAuthProperties.getProperty(propertyName));
 		return oAuthProperties.getProperty(propertyName);
 	}
 
 	/**
-	 * 
-	 * @return get Password from user and return as String object
+	 * <p>This is supposed to ask user to type in password. <br>
+	 * Console object must be available for this to success. Otherwise, it looks for password from the property file</p>
+	 * @return String - get Password from user or property file. Returns NULL if both fails
 	 */
 	private String getPassword() {
 		if (null == password || password.isBlank() || password.isEmpty()) {
@@ -263,7 +293,7 @@ public class CheckingMails {
 	}
 
 	/**
-	 * Just loop through 3 choices user have
+	 * Just loop through 3 choices that user have
 	 * 1. Read Email from a folder (default - Inbox)
 	 * 2. Send an Email to an user
 	 * 3. Close the program
@@ -271,7 +301,7 @@ public class CheckingMails {
 	private void userInteraction() {
 		System.out.println("Starting user Interaction");
 		while (true) {
-			int input = Integer.parseInt(getUserInput("1 - Read, 2 - Send Email, 3 - Exit..."));
+			int input = Integer.parseInt(getUserInput("1 - Read, 2 - Send Email, Any other number - Exit..."));
 			switch (input) {
 			case 1:
 				checkMails(getUserInput("Type Folder Name to view details : "));
